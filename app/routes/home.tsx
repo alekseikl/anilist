@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
-import { useGetMediaQuery } from "../store/anilistApi";
+import { useGetMediaQuery, useGetViewerQuery } from "../store/anilistApi";
+import { ANILIST_AUTH_URL, getToken, clearToken } from "../lib/auth";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,17 +9,59 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-const ANIME_ID = 15125; // Teekyuu
+const ANIME_ID = 15125;
 
 export default function Home() {
+  const isAuthenticated = !!getToken();
+
   const { data, error, isLoading } = useGetMediaQuery(ANIME_ID);
+  const { data: viewer } = useGetViewerQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  function handleLogout() {
+    clearToken();
+    window.location.href = "/";
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-100">
       <div className="w-full max-w-md rounded-2xl bg-gray-900 p-8 shadow-xl">
-        <h1 className="mb-6 text-2xl font-bold tracking-tight">
-          AniList Media Lookup
-        </h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight">
+            AniList Media Lookup
+          </h1>
+
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              {viewer && (
+                <div className="flex items-center gap-2">
+                  {viewer.avatar.medium && (
+                    <img
+                      src={viewer.avatar.medium}
+                      alt={viewer.name}
+                      className="h-8 w-8 rounded-full"
+                    />
+                  )}
+                  <span className="text-sm text-gray-300">{viewer.name}</span>
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <a
+              href={ANILIST_AUTH_URL}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+            >
+              Login with AniList
+            </a>
+          )}
+        </div>
 
         {isLoading && (
           <p className="animate-pulse text-gray-400">Loading…</p>

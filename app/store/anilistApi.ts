@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
+import { getToken } from "../lib/auth";
 
 type GraphqlBaseQueryArgs = {
   body: string;
@@ -12,14 +13,25 @@ type GraphqlBaseQueryError = {
 };
 
 const graphqlBaseQuery =
-  ({ baseUrl }: { baseUrl: string }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
+  ({
+    baseUrl,
+  }: {
+    baseUrl: string;
+  }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
   async ({ body, variables }) => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    const token = getToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const result = await fetch(baseUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify({ query: body, variables }),
     });
 
@@ -47,9 +59,19 @@ interface MediaQueryResponse {
   Media: Media;
 }
 
+interface Viewer {
+  id: number;
+  name: string;
+  avatar: { medium: string | null };
+}
+
+interface ViewerQueryResponse {
+  Viewer: Viewer;
+}
+
 export const anilistApi = createApi({
   reducerPath: "anilistApi",
-  baseQuery: graphqlBaseQuery({ baseUrl: "/api/graphql" }),
+  baseQuery: graphqlBaseQuery({ baseUrl: "https://graphql.anilist.co" }),
   endpoints: (builder) => ({
     getMedia: builder.query<Media, number>({
       query: (id) => ({
@@ -69,7 +91,24 @@ export const anilistApi = createApi({
       }),
       transformResponse: (response: MediaQueryResponse) => response.Media,
     }),
+
+    getViewer: builder.query<Viewer, void>({
+      query: () => ({
+        body: `
+          query {
+            Viewer {
+              id
+              name
+              avatar {
+                medium
+              }
+            }
+          }
+        `,
+      }),
+      transformResponse: (response: ViewerQueryResponse) => response.Viewer,
+    }),
   }),
 });
 
-export const { useGetMediaQuery } = anilistApi;
+export const { useGetMediaQuery, useGetViewerQuery } = anilistApi;
