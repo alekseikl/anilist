@@ -1,6 +1,7 @@
+import { useGetMediaQuery, useGetViewerQuery } from "../../store/anilistApi";
+import { logout } from "~/store/auth";
+import { useAppDispatch } from "~/store/store";
 import type { Route } from "./+types/home";
-import { useGetMediaQuery, useGetViewerQuery } from "../store/anilistApi";
-import { ANILIST_AUTH_URL, getToken, clearToken } from "../lib/auth";
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -12,17 +13,16 @@ export function meta(_args: Route.MetaArgs) {
 const ANIME_ID = 15125;
 
 export default function Home() {
-  const isAuthenticated = !!getToken();
+  const dispatch = useAppDispatch();
 
   const { data, error, isLoading } = useGetMediaQuery(ANIME_ID);
-  const { data: viewer } = useGetViewerQuery(undefined, {
-    skip: !isAuthenticated,
-  });
+  const { data: viewer } = useGetViewerQuery(undefined);
 
-  function handleLogout() {
-    clearToken();
-    window.location.href = "/";
-  }
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-100">
@@ -32,35 +32,27 @@ export default function Home() {
             AniList Media Lookup
           </h1>
 
-          {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              {viewer && (
-                <div className="flex items-center gap-2">
-                  {viewer.avatar.medium && (
-                    <img
-                      src={viewer.avatar.medium}
-                      alt={viewer.name}
-                      className="h-8 w-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-sm text-gray-300">{viewer.name}</span>
-                </div>
-              )}
-              <button
-                onClick={handleLogout}
-                className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <a
-              href={ANILIST_AUTH_URL}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+          <div className="flex items-center gap-3">
+            {viewer && (
+              <div className="flex items-center gap-2">
+                {viewer.avatar.medium && (
+                  <img
+                    src={viewer.avatar.medium}
+                    alt={viewer.name}
+                    className="h-8 w-8 rounded-full"
+                  />
+                )}
+                <span className="text-sm text-gray-300">{viewer.name}</span>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
             >
-              Login with AniList
-            </a>
-          )}
+              Logout
+            </button>
+          </div>
+
         </div>
 
         {isLoading && (

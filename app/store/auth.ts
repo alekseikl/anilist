@@ -4,11 +4,18 @@ import type { AppDispatch, RootState } from "./store";
 export const ANILIST_CLIENT_ID = "38375";
 export const ANILIST_CLIENT_SECRET = "qDYSPdAONzxSZ0kPmcLFDuVYZOvBZrpclpKVgYff";
 export const ANILIST_REDIRECT_URI = "http://localhost:5173/auth-callback";
+export const ANILIST_AUTH_URL =
+    `https://anilist.co/api/v2/oauth/authorize` +
+    `?client_id=${ANILIST_CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(ANILIST_REDIRECT_URI)}` +
+    `&response_type=code`;
+
+const JWT_TOKEN_KEY = "jwt-token";
 
 interface AuthState {
     pending: boolean,
-    jwt: string | null,
-    error: string | null
+    jwt: string | undefined,
+    error: string | undefined
 }
 
 type ThunkApi = {
@@ -44,26 +51,31 @@ export const exchangeCodeForToken = createAsyncThunk<string, string, ThunkApi>(
             throw new Error("No access token in response");
         }
 
+        localStorage.setItem(JWT_TOKEN_KEY, data.access_token);
+
         return data.access_token as string;
     }
 );
 
+const initialJWT = (typeof window !== "undefined" ? localStorage.getItem(JWT_TOKEN_KEY) ?? undefined : undefined);
+
 const authSlice = createSlice({
     name: 'auth',
-    initialState: { pending: false, jwt: null, error: null } satisfies AuthState as AuthState,
+    initialState: { pending: false, jwt: initialJWT, error: undefined } satisfies AuthState as AuthState,
     reducers: {
         logout(state) {
             state.pending = false;
-            state.jwt = null;
-            state.error = null;
+            state.jwt = undefined;
+            state.error = undefined;
+            localStorage.removeItem(JWT_TOKEN_KEY);
         }
     },
     extraReducers: (builder) => {
         builder.addAsyncThunk(exchangeCodeForToken, {
             pending(state) {
                 state.pending = true;
-                state.error = null;
-                state.jwt = null;
+                state.error = undefined;
+                state.jwt = undefined;
             },
             fulfilled(state, action) {
                 state.jwt = action.payload;

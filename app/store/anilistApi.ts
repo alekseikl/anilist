@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
-import { getToken } from "../lib/auth";
+import type { RootState } from "./store";
 
 type GraphqlBaseQueryArgs = {
   body: string;
@@ -18,31 +18,32 @@ const graphqlBaseQuery =
   }: {
     baseUrl: string;
   }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
-  async ({ body, variables }) => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+    async ({ body, variables }, api) => {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      };
+
+      const token = (api.getState() as RootState).auth.jwt;
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const result = await fetch(baseUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ query: body, variables }),
+      });
+
+      const json = await result.json();
+
+      if (json.errors) {
+        return { error: { status: result.status, data: json.errors } };
+      }
+
+      return { data: json.data };
     };
-
-    const token = getToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const result = await fetch(baseUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ query: body, variables }),
-    });
-
-    const json = await result.json();
-
-    if (json.errors) {
-      return { error: { status: result.status, data: json.errors } };
-    }
-
-    return { data: json.data };
-  };
 
 interface MediaTitle {
   romaji: string | null;
