@@ -18,7 +18,7 @@ type ThunkApi = {
 
 export const exchangeCodeForToken = createAsyncThunk<string, string, ThunkApi>(
     'auth/exchangeCodeForToken',
-    async (code, thunkApi) => {
+    async (code, _thunkApi) => {
         const response = await fetch("/api/auth/token", {
             method: "POST",
             headers: {

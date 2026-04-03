@@ -2,7 +2,7 @@ import type { Route } from "./+types/home";
 import { useGetMediaQuery, useGetViewerQuery } from "../store/anilistApi";
 import { ANILIST_AUTH_URL, getToken, clearToken } from "../lib/auth";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
   return [
     { title: "AniList Media Viewer" },
     { name: "description", content: "Browse anime from AniList" },
