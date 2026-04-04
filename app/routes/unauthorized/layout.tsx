@@ -4,18 +4,18 @@ import { Outlet, useNavigate } from "react-router";
 import { selectIsLoggedIn } from "~/store/auth";
 
 export default function UnauthorizedLayout() {
-    const navigate = useNavigate();
-    const isLoggedIn = useSelector(selectIsLoggedIn);
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector(selectIsLoggedIn);
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            navigate("/", { replace: true });
-        }
-    }, [isLoggedIn, navigate]);
-
+  useEffect(() => {
     if (isLoggedIn) {
-        return <></>;
+      navigate("/", { replace: true });
     }
+  }, [isLoggedIn, navigate]);
 
-    return <Outlet />;
+  if (isLoggedIn) {
+    return <></>;
+  }
+
+  return <Outlet />;
 }

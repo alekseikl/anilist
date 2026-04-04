@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { anilistApi } from "./anilistApi";
-import authReducer from './auth';
+import authReducer from "./auth";
 import { useDispatch } from "react-redux";
 
 export const store = configureStore({

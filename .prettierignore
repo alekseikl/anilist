@@ -1,0 +1,7 @@
+build
+.react-router
+node_modules
+package-lock.json
+# Introspected / generated; avoid churn and huge diffs
+schema.graphql
+app/graphql-env.d.ts

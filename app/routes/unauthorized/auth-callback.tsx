@@ -22,8 +22,6 @@ export default function AuthCallback() {
     dispatch(exchangeCodeForToken(code)).then(() => {
       navigate("/", { replace: true });
     });
-
-
   }, [searchParams, navigate, dispatch]);
 
   return (

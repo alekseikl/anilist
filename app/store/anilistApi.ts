@@ -20,45 +20,32 @@ const graphqlBaseQuery =
   }: {
     baseUrl: string;
   }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
-    async ({ query, variables }, api) => {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      };
-
-      const token = (api.getState() as RootState).auth.jwt;
-
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const result = await fetch(baseUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ query: print(query), variables }),
-      });
-
-      const json = await result.json();
-
-      if (json.errors) {
-        return { error: { status: result.status, data: json.errors } };
-      }
-
-      return { data: json.data };
+  async ({ query, variables }, api) => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
     };
 
-const MediaQuery = graphql(`
-  query ($id: Int) {
-    Media(id: $id, type: ANIME) {
-      id
-      title {
-        romaji
-        english
-        native
-      }
+    const token = (api.getState() as RootState).auth.jwt;
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
-  }
-`);
+
+    const result = await fetch(baseUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ query: print(query), variables }),
+    });
+
+    const json = await result.json();
+
+    if (json.errors) {
+      return { error: { status: result.status, data: json.errors } };
+    }
+
+    return { data: json.data };
+  };
 
 const ViewerQuery = graphql(`
   query {
@@ -72,22 +59,12 @@ const ViewerQuery = graphql(`
   }
 `);
 
-type MediaData = NonNullable<ResultOf<typeof MediaQuery>["Media"]>;
 type ViewerData = NonNullable<ResultOf<typeof ViewerQuery>["Viewer"]>;
 
 export const anilistApi = createApi({
   reducerPath: "anilistApi",
   baseQuery: graphqlBaseQuery({ baseUrl: "https://graphql.anilist.co" }),
   endpoints: (builder) => ({
-    getMedia: builder.query<MediaData, number>({
-      query: (id) => ({
-        query: MediaQuery,
-        variables: { id },
-      }),
-      transformResponse: (response: ResultOf<typeof MediaQuery>) =>
-        response.Media!,
-    }),
-
     getViewer: builder.query<ViewerData, void>({
       query: () => ({
         query: ViewerQuery,
@@ -98,4 +75,4 @@ export const anilistApi = createApi({
   }),
 });
 
-export const { useGetMediaQuery, useGetViewerQuery } = anilistApi;
+export const { useGetViewerQuery } = anilistApi;

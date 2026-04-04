@@ -1,4 +1,5 @@
-import { useGetMediaQuery, useGetViewerQuery } from "../../store/anilistApi";
+import { useGetMediaQuery } from "../../store/mediaApi";
+import { useGetViewerQuery } from "../../store/anilistApi";
 import { logout } from "~/store/auth";
 import { useAppDispatch } from "~/store/store";
 import type { Route } from "./+types/home";
@@ -16,13 +17,11 @@ export default function Home() {
   const dispatch = useAppDispatch();
 
   const { data, error, isLoading } = useGetMediaQuery(ANIME_ID);
-  const { data: viewer } = useGetViewerQuery(undefined);
-
+  const { data: viewer } = useGetViewerQuery();
 
   const handleLogout = () => {
     dispatch(logout());
   };
-
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-100">
@@ -52,12 +51,9 @@ export default function Home() {
               Logout
             </button>
           </div>
-
         </div>
 
-        {isLoading && (
-          <p className="animate-pulse text-gray-400">Loading…</p>
-        )}
+        {isLoading && <p className="animate-pulse text-gray-400">Loading…</p>}
 
         {error && (
           <p className="text-red-400">
