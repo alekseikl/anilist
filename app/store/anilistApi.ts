@@ -16,14 +16,14 @@ type GraphqlBaseQueryError = {
 
 const graphqlBaseQuery =
   ({
-    baseUrl,
+    baseUrl
   }: {
     baseUrl: string;
   }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
   async ({ query, variables }, api) => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      Accept: "application/json",
+      Accept: "application/json"
     };
 
     const token = (api.getState() as RootState).auth.jwt;
@@ -35,7 +35,7 @@ const graphqlBaseQuery =
     const result = await fetch(baseUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify({ query: print(query), variables }),
+      body: JSON.stringify({ query: print(query), variables })
     });
 
     const json = await result.json();
@@ -67,12 +67,12 @@ export const anilistApi = createApi({
   endpoints: (builder) => ({
     getViewer: builder.query<ViewerData, void>({
       query: () => ({
-        query: ViewerQuery,
+        query: ViewerQuery
       }),
       transformResponse: (response: ResultOf<typeof ViewerQuery>) =>
-        response.Viewer!,
-    }),
-  }),
+        response.Viewer!
+    })
+  })
 });
 
 export const { useGetViewerQuery } = anilistApi;

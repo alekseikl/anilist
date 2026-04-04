@@ -1,7 +1,7 @@
 import {
   createAsyncThunk,
   createSelector,
-  createSlice,
+  createSlice
 } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "./store";
 
@@ -34,15 +34,15 @@ export const exchangeCodeForToken = createAsyncThunk<string, string, ThunkApi>(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
+        Accept: "application/json"
       },
       body: JSON.stringify({
         grant_type: "authorization_code",
         client_id: ANILIST_CLIENT_ID,
         client_secret: ANILIST_CLIENT_SECRET,
         redirect_uri: ANILIST_REDIRECT_URI,
-        code,
-      }),
+        code
+      })
     });
 
     if (!response.ok) {
@@ -58,7 +58,7 @@ export const exchangeCodeForToken = createAsyncThunk<string, string, ThunkApi>(
     localStorage.setItem(JWT_TOKEN_KEY, data.access_token);
 
     return data.access_token as string;
-  },
+  }
 );
 
 const initialJWT =
@@ -69,7 +69,7 @@ const authSlice = createSlice({
   initialState: {
     pending: false,
     jwt: initialJWT,
-    error: null,
+    error: null
   } satisfies AuthState as AuthState,
   reducers: {
     logout(state) {
@@ -77,7 +77,7 @@ const authSlice = createSlice({
       state.jwt = null;
       state.error = null;
       localStorage.removeItem(JWT_TOKEN_KEY);
-    },
+    }
   },
   extraReducers: (builder) => {
     builder.addAsyncThunk(exchangeCodeForToken, {
@@ -94,9 +94,9 @@ const authSlice = createSlice({
       },
       settled(state) {
         state.pending = false;
-      },
+      }
     });
-  },
+  }
 });
 
 export const selectIsLoggedIn = (state: RootState) => !!state.auth.jwt;
@@ -104,8 +104,8 @@ export const selectExchangeCodeState = createSelector(
   (state: RootState) => state.auth,
   (state) => ({
     pending: state.pending,
-    error: state.error,
-  }),
+    error: state.error
+  })
 );
 
 const { actions, reducer } = authSlice;

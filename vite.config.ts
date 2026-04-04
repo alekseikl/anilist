@@ -12,22 +12,22 @@ export default defineConfig({
       babelConfig: {
         plugins: [
           ["babel-plugin-react-compiler", {}],
-          ["@babel/plugin-syntax-jsx", {}],
+          ["@babel/plugin-syntax-jsx", {}]
         ],
-        presets: ["@babel/preset-typescript"],
+        presets: ["@babel/preset-typescript"]
       },
       filter: /\.[jt]sx?$/u,
-      loader: "jsx",
+      loader: "jsx"
     }),
-    tsconfigPaths(),
+    tsconfigPaths()
   ],
   server: {
     proxy: {
       "/api/auth/token": {
         target: "https://anilist.co",
         changeOrigin: true,
-        rewrite: () => "/api/v2/oauth/token",
-      },
-    },
-  },
+        rewrite: () => "/api/v2/oauth/token"
+      }
+    }
+  }
 });

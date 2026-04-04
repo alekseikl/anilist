@@ -9,8 +9,8 @@
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier-eslint --write \"**/*.{js,jsx,mjs,cjs,ts,tsx,json,css,md}\" --ignore \"build/**\" --ignore \".react-router/**\"",
+    "format:check": "prettier-eslint --list-different \"**/*.{js,jsx,mjs,cjs,ts,tsx,json,css,md}\" --ignore \"build/**\" --ignore \".react-router/**\""
   },
   "dependencies": {
     "@react-router/node": "7.12.0",
@@ -34,9 +34,12 @@
     "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.4",
-    "prettier": "^3.6.2",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "prettier": "^3.6.2",
+    "prettier-eslint": "^17.0.0-alpha.1",
+    "prettier-eslint-cli": "^9.0.0-alpha.2",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.58.0",

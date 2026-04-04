@@ -6,10 +6,10 @@ import { useDispatch } from "react-redux";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    [anilistApi.reducerPath]: anilistApi.reducer,
+    [anilistApi.reducerPath]: anilistApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(anilistApi.middleware),
+    getDefaultMiddleware().concat(anilistApi.middleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;
