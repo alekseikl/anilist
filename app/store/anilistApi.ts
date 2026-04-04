@@ -1,9 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import type { RootState } from "./store";
+import { graphql, type ResultOf } from "gql.tada";
+import { print, type ASTNode } from "@0no-co/graphql.web";
 
 type GraphqlBaseQueryArgs = {
-  body: string;
+  query: ASTNode;
   variables?: Record<string, unknown>;
 };
 
@@ -18,7 +20,7 @@ const graphqlBaseQuery =
   }: {
     baseUrl: string;
   }): BaseQueryFn<GraphqlBaseQueryArgs, unknown, GraphqlBaseQueryError> =>
-    async ({ body, variables }, api) => {
+    async ({ query, variables }, api) => {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -33,7 +35,7 @@ const graphqlBaseQuery =
       const result = await fetch(baseUrl, {
         method: "POST",
         headers,
-        body: JSON.stringify({ query: body, variables }),
+        body: JSON.stringify({ query: print(query), variables }),
       });
 
       const json = await result.json();
@@ -45,69 +47,53 @@ const graphqlBaseQuery =
       return { data: json.data };
     };
 
-interface MediaTitle {
-  romaji: string | null;
-  english: string | null;
-  native: string | null;
-}
+const MediaQuery = graphql(`
+  query ($id: Int) {
+    Media(id: $id, type: ANIME) {
+      id
+      title {
+        romaji
+        english
+        native
+      }
+    }
+  }
+`);
 
-interface Media {
-  id: number;
-  title: MediaTitle;
-}
+const ViewerQuery = graphql(`
+  query {
+    Viewer {
+      id
+      name
+      avatar {
+        medium
+      }
+    }
+  }
+`);
 
-interface MediaQueryResponse {
-  Media: Media;
-}
-
-interface Viewer {
-  id: number;
-  name: string;
-  avatar: { medium: string | null };
-}
-
-interface ViewerQueryResponse {
-  Viewer: Viewer;
-}
+type MediaData = NonNullable<ResultOf<typeof MediaQuery>["Media"]>;
+type ViewerData = NonNullable<ResultOf<typeof ViewerQuery>["Viewer"]>;
 
 export const anilistApi = createApi({
   reducerPath: "anilistApi",
   baseQuery: graphqlBaseQuery({ baseUrl: "https://graphql.anilist.co" }),
   endpoints: (builder) => ({
-    getMedia: builder.query<Media, number>({
+    getMedia: builder.query<MediaData, number>({
       query: (id) => ({
-        body: `
-          query ($id: Int) {
-            Media (id: $id, type: ANIME) {
-              id
-              title {
-                romaji
-                english
-                native
-              }
-            }
-          }
-        `,
+        query: MediaQuery,
         variables: { id },
       }),
-      transformResponse: (response: MediaQueryResponse) => response.Media,
+      transformResponse: (response: ResultOf<typeof MediaQuery>) =>
+        response.Media!,
     }),
 
-    getViewer: builder.query<Viewer, void>({
+    getViewer: builder.query<ViewerData, void>({
       query: () => ({
-        body: `
-          query {
-            Viewer {
-              id
-              name
-              avatar {
-                medium
-              }
-            }
-          }
-        `,
+        query: ViewerQuery,
       }),
-      transformResponse: (response: ViewerQueryResponse) => response.Viewer,
+      transformResponse: (response: ResultOf<typeof ViewerQuery>) =>
+        response.Viewer!,
     }),
   }),
 });

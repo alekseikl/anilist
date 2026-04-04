@@ -35,7 +35,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {viewer && (
               <div className="flex items-center gap-2">
-                {viewer.avatar.medium && (
+                {viewer.avatar?.medium && (
                   <img
                     src={viewer.avatar.medium}
                     alt={viewer.name}
@@ -80,19 +80,19 @@ export default function Home() {
               <dt className="text-xs uppercase tracking-wider text-gray-500">
                 Romaji
               </dt>
-              <dd className="text-lg">{data.title.romaji}</dd>
+              <dd className="text-lg">{data.title?.romaji}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wider text-gray-500">
                 English
               </dt>
-              <dd className="text-lg">{data.title.english ?? "—"}</dd>
+              <dd className="text-lg">{data.title?.english ?? "—"}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wider text-gray-500">
                 Native
               </dt>
-              <dd className="text-lg">{data.title.native ?? "—"}</dd>
+              <dd className="text-lg">{data.title?.native ?? "—"}</dd>
             </div>
           </dl>
         )}

@@ -14,8 +14,8 @@ const JWT_TOKEN_KEY = "jwt-token";
 
 interface AuthState {
     pending: boolean,
-    jwt: string | undefined,
-    error: string | undefined
+    jwt: string | null,
+    error: string | null
 }
 
 type ThunkApi = {
@@ -57,16 +57,16 @@ export const exchangeCodeForToken = createAsyncThunk<string, string, ThunkApi>(
     }
 );
 
-const initialJWT = (typeof window !== "undefined" ? localStorage.getItem(JWT_TOKEN_KEY) ?? undefined : undefined);
+const initialJWT = (typeof window !== "undefined" ? localStorage.getItem(JWT_TOKEN_KEY) : null);
 
 const authSlice = createSlice({
     name: 'auth',
-    initialState: { pending: false, jwt: initialJWT, error: undefined } satisfies AuthState as AuthState,
+    initialState: { pending: false, jwt: initialJWT, error: null } satisfies AuthState as AuthState,
     reducers: {
         logout(state) {
             state.pending = false;
-            state.jwt = undefined;
-            state.error = undefined;
+            state.jwt = null;
+            state.error = null;
             localStorage.removeItem(JWT_TOKEN_KEY);
         }
     },
@@ -74,8 +74,8 @@ const authSlice = createSlice({
         builder.addAsyncThunk(exchangeCodeForToken, {
             pending(state) {
                 state.pending = true;
-                state.error = undefined;
-                state.jwt = undefined;
+                state.error = null;
+                state.jwt = null;
             },
             fulfilled(state, action) {
                 state.jwt = action.payload;
