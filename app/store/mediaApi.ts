@@ -1,7 +1,52 @@
 import { graphql, type ResultOf } from "gql.tada";
 import { anilistApi } from "./anilistApi";
 
-const MediaFragment = graphql(`
+const BrowseAnimeQuery = graphql(`
+  query (
+    $season: MediaSeason
+    $seasonYear: Int
+    $nextSeason: MediaSeason
+    $nextYear: Int
+  ) {
+    trending: Page(page: 1, perPage: 6) {
+      media(sort: TRENDING_DESC, type: ANIME, isAdult: false) {
+        ...media
+      }
+    }
+    season: Page(page: 1, perPage: 6) {
+      media(
+        season: $season
+        seasonYear: $seasonYear
+        sort: POPULARITY_DESC
+        type: ANIME
+        isAdult: false
+      ) {
+        ...media
+      }
+    }
+    nextSeason: Page(page: 1, perPage: 6) {
+      media(
+        season: $nextSeason
+        seasonYear: $nextYear
+        sort: POPULARITY_DESC
+        type: ANIME
+        isAdult: false
+      ) {
+        ...media
+      }
+    }
+    popular: Page(page: 1, perPage: 6) {
+      media(sort: POPULARITY_DESC, type: ANIME, isAdult: false) {
+        ...media
+      }
+    }
+    top: Page(page: 1, perPage: 10) {
+      media(sort: SCORE_DESC, type: ANIME, isAdult: false) {
+        ...media
+      }
+    }
+  }
+
   fragment media on Media {
     id
     title {
@@ -58,55 +103,7 @@ const MediaFragment = graphql(`
   }
 `);
 
-const BrowseAnimeQuery = graphql(
-  `
-    query (
-      $season: MediaSeason
-      $seasonYear: Int
-      $nextSeason: MediaSeason
-      $nextYear: Int
-    ) {
-      trending: Page(page: 1, perPage: 6) {
-        media(sort: TRENDING_DESC, type: ANIME, isAdult: false) {
-          ...media
-        }
-      }
-      season: Page(page: 1, perPage: 6) {
-        media(
-          season: $season
-          seasonYear: $seasonYear
-          sort: POPULARITY_DESC
-          type: ANIME
-          isAdult: false
-        ) {
-          ...media
-        }
-      }
-      nextSeason: Page(page: 1, perPage: 6) {
-        media(
-          season: $nextSeason
-          seasonYear: $nextYear
-          sort: POPULARITY_DESC
-          type: ANIME
-          isAdult: false
-        ) {
-          ...media
-        }
-      }
-      popular: Page(page: 1, perPage: 6) {
-        media(sort: POPULARITY_DESC, type: ANIME, isAdult: false) {
-          ...media
-        }
-      }
-      top: Page(page: 1, perPage: 10) {
-        media(sort: SCORE_DESC, type: ANIME, isAdult: false) {
-          ...media
-        }
-      }
-    }
-  `,
-  [MediaFragment],
-);
+type BrowseAnimeData = ResultOf<typeof BrowseAnimeQuery>;
 
 const MediaQuery = graphql(`
   query ($id: Int) {
@@ -133,7 +130,18 @@ const mediaApi = anilistApi.injectEndpoints({
       transformResponse: (response: ResultOf<typeof MediaQuery>) =>
         response.Media!,
     }),
+    getBrowseAnime: builder.query<BrowseAnimeData, void>({
+      query: () => ({
+        query: BrowseAnimeQuery,
+        variables: {
+          season: "SPRING",
+          seasonYear: 2026,
+          nextSeason: "SUMMER",
+          nextYear: 2026,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetMediaQuery } = mediaApi;
+export const { useGetMediaQuery, useGetBrowseAnimeQuery } = mediaApi;

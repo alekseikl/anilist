@@ -1,4 +1,4 @@
-import { useGetMediaQuery } from "../../store/mediaApi";
+import { useGetBrowseAnimeQuery, useGetMediaQuery } from "../../store/mediaApi";
 import { useGetViewerQuery } from "../../store/anilistApi";
 import { logout } from "~/store/auth";
 import { useAppDispatch } from "~/store/store";
@@ -18,6 +18,7 @@ export default function Home() {
 
   const { data, error, isLoading } = useGetMediaQuery(ANIME_ID);
   const { data: viewer } = useGetViewerQuery();
+  const { data: browseAnime } = useGetBrowseAnimeQuery();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -52,6 +53,8 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {browseAnime && browseAnime.popular?.media?.[0]?.coverImage?.extraLarge}
 
         {isLoading && <p className="animate-pulse text-gray-400">Loading…</p>}
 
