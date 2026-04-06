@@ -1,8 +1,13 @@
-import { useGetBrowseAnimeQuery, useGetMediaQuery } from "../../store/mediaApi";
+import {
+  type BrowseAnimeMediaList,
+  useGetBrowseAnimeQuery,
+  useGetMediaQuery,
+} from "../../store/mediaApi";
 import { useGetViewerQuery } from "../../store/anilistApi";
 import { logout } from "~/store/auth";
 import { useAppDispatch } from "~/store/store";
 import type { Route } from "./+types/home";
+import BrowseAnimeRow from "./components/BrowseAnimeRow";
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -23,6 +28,10 @@ export default function Home() {
   const handleLogout = () => {
     dispatch(logout());
   };
+
+  const trending = browseAnime?.trending?.media as
+    | BrowseAnimeMediaList
+    | undefined;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-100">
@@ -54,8 +63,6 @@ export default function Home() {
           </div>
         </div>
 
-        {browseAnime && browseAnime.popular?.media?.[0]?.coverImage?.extraLarge}
-
         {isLoading && <p className="animate-pulse text-gray-400">Loading…</p>}
 
         {error && (
@@ -66,6 +73,8 @@ export default function Home() {
               : "Please try again later."}
           </p>
         )}
+
+        {trending && <BrowseAnimeRow list={trending} />}
 
         {data && (
           <dl className="space-y-3">

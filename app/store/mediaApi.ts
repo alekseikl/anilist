@@ -105,6 +105,12 @@ const BrowseAnimeQuery = graphql(`
 
 type BrowseAnimeData = ResultOf<typeof BrowseAnimeQuery>;
 
+export type BrowseAnimeMedia = NonNullable<
+  NonNullable<NonNullable<BrowseAnimeData["popular"]>["media"]>[number]
+>;
+
+export type BrowseAnimeMediaList = BrowseAnimeMedia[];
+
 const MediaQuery = graphql(`
   query ($id: Int) {
     Media(id: $id, type: ANIME) {
